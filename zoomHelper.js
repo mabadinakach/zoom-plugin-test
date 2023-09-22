@@ -109,11 +109,30 @@ const getUserSettings = async (userId) => {
   return usersList.data;
 }
 
+const getVideoRecordings = async () => {
+  let videoRecordings = await axios({
+    url: `https://api.zoom.us/v2/videosdk/recordings`,
+    headers: {
+      Authorization: "Bearer " + process.env.access_token,
+    },
+  })
+    .then((response) => {
+      return response;
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+  console.log(videoRecordings.data);
+  return videoRecordings.data;
+}
+
+
 module.exports = {
   authorize,
   redirect,
   meetings,
   updateUserSettings,
   users,
-  getUserSettings
+  getUserSettings,
+  getVideoRecordings,
 };

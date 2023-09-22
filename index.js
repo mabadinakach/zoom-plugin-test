@@ -3,7 +3,7 @@ require("dotenv").config();
 const express = require("express");
 const app = express();
 const port = process.env.PORT || 3000; // Use the provided port or 3000 if not specified
-const { authorize, redirect, meetings, users, updateUserSettings, getUserSettings } = require("./zoomHelper");
+const { authorize, redirect, meetings, users, updateUserSettings, getUserSettings, getVideoRecordings } = require("./zoomHelper");
 
 // Middleware to parse JSON requests
 app.use(express.json());
@@ -38,6 +38,8 @@ app.get("/redirect", async (req, res) => {
       "shared_screen": true,
     },
   });
+  console.log("Get Video Recordings: \n\n\n\n")
+  getVideoRecordings();
 
   return res.json(data);
 });
