@@ -126,6 +126,23 @@ const getVideoRecordings = async () => {
   return videoRecordings.data;
 }
 
+const getMeetingDetails = async (meetingId) => {
+  let meetingDetails = await axios({
+    url: `https://api.zoom.us/v2/meetings/${meetingId}`,
+    headers: {
+      Authorization: "Bearer " + process.env.access_token,
+    },
+  })
+    .then((response) => {
+      return response;
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+  console.log(meetingDetails.data);
+  return meetingDetails.data;
+}
+
 
 module.exports = {
   authorize,
@@ -135,4 +152,5 @@ module.exports = {
   users,
   getUserSettings,
   getVideoRecordings,
+  getMeetingDetails,
 };
