@@ -50,4 +50,11 @@ app.post("/users/:userId/settings", async (req, res) => {
   return res.json(usersList);
 });
 
+app.get("/users/:userId/settings", async (req, res) => {
+  let userId = req.params.userId;
+  let usersList = await getUserSettings(userId);
+
+  return res.json(usersList);
+});
+
 app.post("/users", async (req, res) => {});

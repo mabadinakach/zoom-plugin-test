@@ -5,8 +5,6 @@ const authorize = async () => {
   return `https://zoom.us/oauth/authorize?response_type=code&client_id=${process.env.ZOOM_CLIENT_ID}&redirect_uri=${process.env.ZOOM_OAUTH_REDIRECT_URI}`;
 };
 
-var user_access_token = "";
-
 const redirect = async (code) => {
   var data = qs.stringify({
     code: code,
@@ -94,8 +92,28 @@ const updateUserSettings = async (userId, settings) => {
   return usersList.data;
 }
 
+const getUserSettings = async (userId) => {
+  let usersList = await axios({
+    url: `https://api.zoom.us/v2/users/${userId}/settings`,
+    headers: {
+      Authorization: "Bearer " + process.env.access_token,
+    },
+  })
+    .then((response) => {
+      return response;
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+  console.log(usersList.data);
+  return usersList.data;
+}
+
 module.exports = {
   authorize,
   redirect,
   meetings,
+  updateUserSettings,
+  users,
+  getUserSettings
 };
