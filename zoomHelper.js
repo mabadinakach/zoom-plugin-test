@@ -5,6 +5,8 @@ const authorize = async () => {
   return `https://zoom.us/oauth/authorize?response_type=code&client_id=${process.env.ZOOM_CLIENT_ID}&redirect_uri=${process.env.ZOOM_OAUTH_REDIRECT_URI}`;
 };
 
+var user_access_token = "";
+
 const redirect = async (code) => {
   var data = qs.stringify({
     code: code,
@@ -34,7 +36,7 @@ const redirect = async (code) => {
     .catch(function (error) {
       console.log(error);
     });
-
+  
   console.log("RESULT IS: " + result);
   return result;
 };
@@ -56,6 +58,41 @@ const meetings = async (filter) => {
   console.log(meetingList.data);
   return meetingList.data;
 };
+
+const users = async (filter) => {
+  let usersList = await axios({
+    url: "https://api.zoom.us/v2/users",
+    headers: {
+      Authorization: "Bearer " + process.env.access_token,
+    },
+  })
+    .then((response) => {
+      return response;
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+  console.log(usersList.data);
+  return usersList.data;
+}
+
+const updateUserSettings = async (userId, settings) => {
+  let usersList = await axios({
+    url: `https://api.zoom.us/v2/users/${userId}/settings`,
+    headers: {
+      Authorization: "Bearer " + process.env.access_token,
+    },
+    data: settings,
+  })
+    .then((response) => {
+      return response;
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+  console.log(usersList.data);
+  return usersList.data;
+}
 
 module.exports = {
   authorize,

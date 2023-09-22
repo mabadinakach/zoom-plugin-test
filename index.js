@@ -36,4 +36,18 @@ app.get("/meetings", async (req, res) => {
   return res.json(meetingList);
 });
 
-app.post("/meetings", async (req, res) => {});
+app.get("/users", async (req, res) => {
+  let usersList = await users();
+
+  return res.json(usersList);
+});
+
+app.post("/users/:userId/settings", async (req, res) => {
+  let settings = req.body;
+  let userId = req.params.userId;
+  let usersList = await updateUserSettings(userId, settings);
+
+  return res.json(usersList);
+});
+
+app.post("/users", async (req, res) => {});
