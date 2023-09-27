@@ -3,7 +3,16 @@ require("dotenv").config();
 const express = require("express");
 const app = express();
 const port = process.env.PORT || 3000; // Use the provided port or 3000 if not specified
-const { authorize, redirect, meetings, users, updateUserSettings, getUserSettings, getVideoRecordings, getMeetingDetails } = require("./zoomHelper");
+const {
+  authorize,
+  redirect,
+  meetings,
+  users,
+  updateUserSettings,
+  getUserSettings,
+  getVideoRecordings,
+  getMeetingDetails,
+} = require("./zoomHelper");
 
 // Middleware to parse JSON requests
 app.use(express.json());
@@ -28,18 +37,23 @@ app.get("/redirect", async (req, res) => {
 
   process.env.access_token = data.access_token;
 
-  console.log("Get User Settings: \n\n\n\n")
-  getUserSettings("me");
-  console.log("Update User Settings: \n\n\n\n")
-  updateUserSettings("me", {
-    record_files_separately: {
-      "active_speaker": true,
-      "gallery_view": true,
-      "shared_screen": true,
-    },
-  });
-  console.log("Get Meeting Details: \n\n\n\n")
-  getMeetingDetails("4309970060");
+  // console.log("Get User Settings: \n\n\n\n");
+  // getUserSettings("me");
+
+  // // console.log("Update User Settings: \n\n\n\n");
+  // // updateUserSettings("me", {
+  // //   record_files_separately: {
+  // //     active_speaker: true,
+  // //     gallery_view: true,
+  // //     shared_screen: true,
+  // //   },
+  // // });
+
+  // console.log("Get Meeting Details: \n\n\n\n");
+  // getMeetingDetails("9813659918");
+
+  console.log("Get Video Recordings: \n\n\n\n");
+  getVideoRecordings("9813659918");
 
   return res.json(data);
 });
@@ -69,6 +83,13 @@ app.get("/users/:userId/settings", async (req, res) => {
   let usersList = await getUserSettings(userId);
 
   return res.json(usersList);
+});
+
+app.get("/meetings/:meetingId/recordings", async (req, res) => {
+  let meetingId = req.params.meetingId;
+  let recordings = await getVideoRecordings(meetingId);
+
+  return res.json(recordings);
 });
 
 app.post("/users", async (req, res) => {});

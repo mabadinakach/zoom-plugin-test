@@ -34,7 +34,7 @@ const redirect = async (code) => {
     .catch(function (error) {
       console.log(error);
     });
-  
+
   console.log("RESULT IS: " + result);
   return result;
 };
@@ -72,7 +72,7 @@ const users = async (filter) => {
     });
   console.log(usersList.data);
   return usersList.data;
-}
+};
 
 const updateUserSettings = async (userId, settings) => {
   let usersList = await axios({
@@ -90,7 +90,7 @@ const updateUserSettings = async (userId, settings) => {
     });
   console.log(usersList.data);
   return usersList.data;
-}
+};
 
 const getUserSettings = async (userId) => {
   let usersList = await axios({
@@ -107,11 +107,11 @@ const getUserSettings = async (userId) => {
     });
   console.log(usersList.data);
   return usersList.data;
-}
+};
 
-const getVideoRecordings = async () => {
+const getVideoRecordings = async (meetingId) => {
   let videoRecordings = await axios({
-    url: `https://api.zoom.us/v2/videosdk/recordings`,
+    url: `https://api.zoom.us/v2/meetings/${meetingId}/recordings`,
     headers: {
       Authorization: "Bearer " + process.env.access_token,
     },
@@ -122,9 +122,9 @@ const getVideoRecordings = async () => {
     .catch((error) => {
       console.log(error);
     });
-  console.log(videoRecordings.data);
+  console.log(videoRecordings.data.participant_audio_files);
   return videoRecordings.data;
-}
+};
 
 const getMeetingDetails = async (meetingId) => {
   let meetingDetails = await axios({
@@ -141,8 +141,7 @@ const getMeetingDetails = async (meetingId) => {
     });
   console.log(meetingDetails.data);
   return meetingDetails.data;
-}
-
+};
 
 module.exports = {
   authorize,
