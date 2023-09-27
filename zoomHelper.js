@@ -1,6 +1,7 @@
 const qs = require("qs");
 const axios = require("axios");
 
+
 const authorize = async () => {
   return `https://zoom.us/oauth/authorize?response_type=code&client_id=${process.env.ZOOM_CLIENT_ID}&redirect_uri=${process.env.ZOOM_OAUTH_REDIRECT_URI}`;
 };
@@ -143,6 +144,18 @@ const getMeetingDetails = async (meetingId) => {
   return meetingDetails.data;
 };
 
+const webhook = async (request, response) => {
+  if(request.body.event === 'endpoint.url_validation') {
+    const hashForValidate = crypto.createHmac('sha256', "").update(request.body.payload.plainToken).digest('hex')
+  
+    response.status(200)
+    return response.json({
+      "plainToken": request.body.payload.plainToken,
+      "encryptedToken": hashForValidate
+    })
+  }
+};
+
 module.exports = {
   authorize,
   redirect,
@@ -152,4 +165,5 @@ module.exports = {
   getUserSettings,
   getVideoRecordings,
   getMeetingDetails,
+  webhook
 };
