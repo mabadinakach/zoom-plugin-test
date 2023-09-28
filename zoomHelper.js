@@ -156,6 +156,25 @@ const webhook = async (request, response) => {
   }
 };
 
+const inMeetingControls = async (meetingId) => {
+  let meetingDetails =  await axios.patch(`https://api.zoom.us/v2/live_meetings/${meetingId}/events`, {
+    "method": "recording.start"
+  }, {
+    headers: {
+      Authorization: "Bearer " + process.env.access_token,
+    }
+  })
+  .then((response) => {
+    console.log(response);
+    return response;
+  })
+  .catch((error) => {
+    console.log(error);
+  });
+  console.log(meetingDetails);
+  return meetingDetails;
+}
+
 module.exports = {
   authorize,
   redirect,
@@ -165,5 +184,6 @@ module.exports = {
   getUserSettings,
   getVideoRecordings,
   getMeetingDetails,
-  webhook
+  webhook,
+  inMeetingControls
 };

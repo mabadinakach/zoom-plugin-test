@@ -1,5 +1,7 @@
 require("dotenv").config();
 const crypto = require('crypto')
+// import { zoomSdk } from '@zoom/appssdk'
+const zoomSdk = require("@zoom/appssdk");
 
 const express = require("express");
 const app = express();
@@ -13,7 +15,8 @@ const {
   getUserSettings,
   getVideoRecordings,
   getMeetingDetails,
-  webhook
+  webhook,
+  inMeetingControls
 } = require("./zoomHelper");
 
 // Middleware to parse JSON requests
@@ -21,6 +24,7 @@ app.use(express.json());
 
 // Routes
 app.get("/", (req, res) => {
+  console.log("Hello, World!");
   res.send("Hello, World!");
 });
 
@@ -97,6 +101,14 @@ app.get("/meetings/:meetingId/recordings", async (req, res) => {
   return res.json(recordings);
 });
 
+app.patch("/live_meetings/:meetingId/events", async (req, res) => {
+  let meetingId = req.params.meetingId;
+  let events = req.body;
+  let response = await inMeetingControls(meetingId);
+
+  return res.json(response);
+})
+
 app.post("/users", async (req, res) => {});
 
 app.post("/webhooks", async (req, res) => {
@@ -134,15 +146,28 @@ app.post("/webhooks", async (req, res) => {
       res.status(response.status)
       res.json(response.message)
     } else {
-      response = { message: 'Authorized request to Zoom Webhook sample.', status: 200 }
+      console.log(process.env.access_token)
 
-      console.log(response.message)
+      response = { message: 'Authorized request to Zoom Webhook sample.', status: 200, response: res.req.body }
+
+      console.log(response)
 
       res.status(response.status)
       res.json(response)
 
       // business logic here, example make API request to Zoom or 3rd party
 
+      console.log("Webhook Body: " + req.body)
+      console.log("Webhook Event: " + req.body.event)
+
+      if (req.body.event == "meeting.started") {
+        inMeetingControls(req.body.payload.object.id)
+        console.log(response)
+      } else if (req.body.event == "meeting.participant_admitted") {
+        console.log(response)
+      } else if (req.body.event == "meeting.recording_completed") {
+        console.log(response)
+      }
     }
   } else {
 
