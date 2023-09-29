@@ -1,7 +1,7 @@
 require("dotenv").config();
-const crypto = require('crypto')
+const crypto = require("crypto");
 // import { zoomSdk } from '@zoom/appssdk'
-const zoomSdk = require("@zoom/appssdk");
+// const zoomSdk = require("@zoom/appssdk");
 
 const express = require("express");
 const app = express();
@@ -16,7 +16,7 @@ const {
   getVideoRecordings,
   getMeetingDetails,
   webhook,
-  inMeetingControls
+  inMeetingControls,
 } = require("./zoomHelper");
 
 // Middleware to parse JSON requests
@@ -58,8 +58,8 @@ app.get("/redirect", async (req, res) => {
   // console.log("Get Meeting Details: \n\n\n\n");
   // getMeetingDetails("9813659918");
 
-  const meetingsList = await meetings()
-  console.log(meetingsList)
+  const meetingsList = await meetings();
+  console.log(meetingsList);
 
   // console.log("Get Video Recordings: \n\n\n\n");
   // getVideoRecordings("9813659918");
@@ -107,75 +107,91 @@ app.patch("/live_meetings/:meetingId/events", async (req, res) => {
   let response = await inMeetingControls(meetingId);
 
   return res.json(response);
-})
+});
 
 app.post("/users", async (req, res) => {});
 
 app.post("/webhooks", async (req, res) => {
-  var response
+  var response;
 
-  console.log(req.headers)
-  console.log(req.body)
+  console.log(req.headers);
+  console.log(req.body);
 
   // construct the message string
-  const message = `v0:${req.headers['x-zm-request-timestamp']}:${JSON.stringify(req.body)}`
+  const message = `v0:${req.headers["x-zm-request-timestamp"]}:${JSON.stringify(
+    req.body
+  )}`;
 
-  const hashForVerify = crypto.createHmac('sha256', process.env.ZOOM_WEBHOOK_SECRET_TOKEN).update(message).digest('hex')
+  const hashForVerify = crypto
+    .createHmac("sha256", process.env.ZOOM_WEBHOOK_SECRET_TOKEN)
+    .update(message)
+    .digest("hex");
 
   // hash the message string with your Webhook Secret Token and prepend the version semantic
-  const signature = `v0=${hashForVerify}`
-  console.log(signature)
+  const signature = `v0=${hashForVerify}`;
+  console.log(signature);
 
   // you validating the request came from Zoom https://marketplace.zoom.us/docs/api-reference/webhook-reference#notification-structure
-  if (req.headers['x-zm-signature'] === signature) {
-
+  if (req.headers["x-zm-signature"] === signature) {
     // Zoom validating you control the webhook endpoint https://marketplace.zoom.us/docs/api-reference/webhook-reference#validate-webhook-endpoint
-    if(req.body.event === 'endpoint.url_validation') {
-      const hashForValidate = crypto.createHmac('sha256', process.env.ZOOM_WEBHOOK_SECRET_TOKEN).update(req.body.payload.plainToken).digest('hex')
+    if (req.body.event === "endpoint.url_validation") {
+      const hashForValidate = crypto
+        .createHmac("sha256", process.env.ZOOM_WEBHOOK_SECRET_TOKEN)
+        .update(req.body.payload.plainToken)
+        .digest("hex");
 
       response = {
         message: {
           plainToken: req.body.payload.plainToken,
-          encryptedToken: hashForValidate
+          encryptedToken: hashForValidate,
         },
-        status: 200
-      }
+        status: 200,
+      };
 
-      console.log(response.message)
+      console.log(response.message);
 
-      res.status(response.status)
-      res.json(response.message)
+      res.status(response.status);
+      res.json(response.message);
     } else {
-      console.log(process.env.access_token)
+      console.log(process.env.access_token);
 
-      response = { message: 'Authorized request to Zoom Webhook sample.', status: 200, response: res.req.body }
+      response = {
+        message: "Authorized request to Zoom Webhook sample.",
+        status: 200,
+        response: res.req.body,
+      };
 
-      console.log(response)
+      console.log(response);
 
-      res.status(response.status)
-      res.json(response)
+      res.status(response.status);
+      res.json(response);
 
       // business logic here, example make API request to Zoom or 3rd party
 
-      console.log("Webhook Body: " + req.body)
-      console.log("Webhook Event: " + req.body.event)
+      console.log("Webhook Body: " + req.body);
+      console.log("Webhook Event: " + req.body.event);
 
       if (req.body.event == "meeting.started") {
-        inMeetingControls(req.body.payload.object.id)
-        console.log(response)
+        inMeetingControls(req.body.payload.object.id);
+        console.log(response);
       } else if (req.body.event == "meeting.participant_admitted") {
-        console.log(response)
-      } else if (req.body.event == "meeting.recording_completed") {
-        console.log(response)
+        console.log(response);
+      } else if (req.body.event == "recording.completed") {
+        console.log(response);
+        let videoRecordings = await getVideoRecordings(
+          req.body.payload.object.uuid
+        );
       }
     }
   } else {
+    response = {
+      message: "Unauthorized request to Zoom Webhook sample.",
+      status: 401,
+    };
 
-    response = { message: 'Unauthorized request to Zoom Webhook sample.', status: 401 }
+    console.log(response.message);
 
-    console.log(response.message)
-
-    res.status(response.status)
-    res.json(response)
+    res.status(response.status);
+    res.json(response);
   }
 });

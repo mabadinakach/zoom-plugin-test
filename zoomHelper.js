@@ -1,7 +1,6 @@
 const qs = require("qs");
 const axios = require("axios");
 
-
 const authorize = async () => {
   return `https://zoom.us/oauth/authorize?response_type=code&client_id=${process.env.ZOOM_CLIENT_ID}&redirect_uri=${process.env.ZOOM_OAUTH_REDIRECT_URI}`;
 };
@@ -54,7 +53,6 @@ const meetings = async (filter) => {
       console.log(error);
     });
 
-  console.log(meetingList.data);
   return meetingList.data;
 };
 
@@ -123,8 +121,11 @@ const getVideoRecordings = async (meetingId) => {
     .catch((error) => {
       console.log(error);
     });
+  if (videoRecordings.data.participant_audio_files == undefined) {
+    return [];
+  }
   console.log(videoRecordings.data.participant_audio_files);
-  return videoRecordings.data;
+  return videoRecordings.data.participant_audio_files;
 };
 
 const getMeetingDetails = async (meetingId) => {
@@ -145,35 +146,43 @@ const getMeetingDetails = async (meetingId) => {
 };
 
 const webhook = async (request, response) => {
-  if(request.body.event === 'endpoint.url_validation') {
-    const hashForValidate = crypto.createHmac('sha256', "").update(request.body.payload.plainToken).digest('hex')
-  
-    response.status(200)
+  if (request.body.event === "endpoint.url_validation") {
+    const hashForValidate = crypto
+      .createHmac("sha256", "")
+      .update(request.body.payload.plainToken)
+      .digest("hex");
+
+    response.status(200);
     return response.json({
-      "plainToken": request.body.payload.plainToken,
-      "encryptedToken": hashForValidate
-    })
+      plainToken: request.body.payload.plainToken,
+      encryptedToken: hashForValidate,
+    });
   }
 };
 
 const inMeetingControls = async (meetingId) => {
-  let meetingDetails =  await axios.patch(`https://api.zoom.us/v2/live_meetings/${meetingId}/events`, {
-    "method": "recording.start"
-  }, {
-    headers: {
-      Authorization: "Bearer " + process.env.access_token,
-    }
-  })
-  .then((response) => {
-    console.log(response);
-    return response;
-  })
-  .catch((error) => {
-    console.log(error);
-  });
+  let meetingDetails = await axios
+    .patch(
+      `https://api.zoom.us/v2/live_meetings/${meetingId}/events`,
+      {
+        method: "recording.start",
+      },
+      {
+        headers: {
+          Authorization: "Bearer " + process.env.access_token,
+        },
+      }
+    )
+    .then((response) => {
+      console.log(response);
+      return response;
+    })
+    .catch((error) => {
+      console.log(error);
+    });
   console.log(meetingDetails);
   return meetingDetails;
-}
+};
 
 module.exports = {
   authorize,
@@ -185,5 +194,5 @@ module.exports = {
   getVideoRecordings,
   getMeetingDetails,
   webhook,
-  inMeetingControls
+  inMeetingControls,
 };
